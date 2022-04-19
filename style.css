@@ -99,7 +99,7 @@ border-top: 1px solid #ccc;
     transform-origin: bottom right;
     transition: transform 0.2s ease;
 }
-.setting:hover .menu{
+.setting.show .menu{
     transform: scale(1);
 }
 .setting .menu li{

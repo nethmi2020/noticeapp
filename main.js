@@ -1,5 +1,6 @@
 const addBox= document.querySelector (".add-box");
  popupBox= document.querySelector(".popup-box");
+ popuptitle= document.querySelector("header p span");
  closepopup=document.querySelector(".close");
  title=popupBox.querySelector("input");
  desc=popupBox.querySelector("textarea");
@@ -12,24 +13,31 @@ const months = ["January","February","March","April","May","June","July","August
 "November","December"];
 
 const notes=JSON.parse(localStorage.getItem("notes") || "[]");
+let isUpdate= false,updateid;
+
 
 // getting localstorage notes if exhiust and parsing them
 // to js object else passing an empty array to notes
  addBox.addEventListener("click",()=>{
     //  alert('hi');
-    title.value="";
-    desc.value="";
+    title.focus();
+
      popupBox.classList.add("show");
  })
  closepopup.addEventListener("click",()=>{
     //  alert('hi');
+    isUpdate=false;
+    title.value="";
+    desc.value="";
+    addBtn.innerText="Update Note";
+    popuptitle.innerText="Update a note"
      popupBox.classList.remove("show");
  })
 
 
  function shownotes(){
      document.querySelectorAll(".note").forEach(note=> note.remove());
-     notes.forEach((note)=>{
+     notes.forEach((note,i)=>{
             let liTag=`
             <li class="note">
             <div class="details">
@@ -39,10 +47,10 @@ const notes=JSON.parse(localStorage.getItem("notes") || "[]");
             <div class="bottom-content">
                 <span>${note.date}</span>
                 <div class="setting">
-                    <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+                    <i onclick="showmenu(this)" class="fa fa-ellipsis-h" aria-hidden="true"></i>
                     <ul class="menu">
-                        <li> <i style="color:blue" class=" fa fa-pencil " ></i>Edit</li>
-                        <li> Delete</li>
+                        <li onclick= "editnote(${i}, '${note.title}','${note.description}')"> <i style="color:blue" class=" fa fa-pencil " ></i>Edit</li>
+                        <li onclick="deletenote(${i})"> Delete</li>
                         <!-- <i class=" fa fa-trash"></i> -->
                     </ul>
                 </div>
@@ -53,6 +61,35 @@ const notes=JSON.parse(localStorage.getItem("notes") || "[]");
      });
  }
  shownotes();
+
+ function showmenu(dd){
+dd.parentElement.classList.add("show");
+document.addEventListener("click",e=>{
+    // removing show class from the stting menu on document click
+    if(e.target.tagName!= "I" || e.target != dd){
+        dd.parentElement.classList.remove("show");
+    }
+})
+ }
+
+ function deletenote(noteid){
+     notes.splice(noteid,1)  //removing selected note frrom array task
+    //  saving updated notes to local stirage
+    localStorage.setItem("notes", JSON.stringify(notes));
+    shownotes();
+ }
+
+ function editnote(noteid, title1,description){
+     addBox.click();
+     isUpdate=true;
+     updateid=noteid;
+     title.value=title1;
+     desc.value=description;
+     addBtn.innerText="Update Note";
+     popuptitle.innerText="Update a note";
+     console.log(noteid, title,description);
+ }
+
  addBtn.addEventListener("click", e=>{
      e.preventDefault();
      let notetitle= title.value;
@@ -70,9 +107,15 @@ const notes=JSON.parse(localStorage.getItem("notes") || "[]");
             date:`${month} ,${year} `
            
          }
-         console.log(noteinfo);
+        // console.log(noteinfo);
 
-
+         if(!isUpdate){
+             notes.push(noteinfo);
+         }
+         else{
+             isUpdate=false;
+             notes[updateid]=noteinfo ;// updating new note to notes
+         }
          
          notes.push(noteinfo); 
          //adding new note to notes
